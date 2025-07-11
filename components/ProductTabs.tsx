@@ -61,18 +61,22 @@ export default function ProductTabs({
   }, [activeTab, productId]);
 
   // تحويل المواصفات من object إلى array للعرض
-  let specsArray: { category: string; features: string[] }[] = [];
-  if (
+  let specsArray: Array<
+    | { category: string; features: string[] }
+    | { title: string; description: string }
+  > = [];
+  if (productSpecs && Array.isArray(productSpecs)) {
+    specsArray = productSpecs as any;
+  } else if (
     productSpecs &&
     typeof productSpecs === "object" &&
     !Array.isArray(productSpecs)
   ) {
+    // إذا كان object قديم
     specsArray = Object.entries(productSpecs).map(([category, features]) => ({
       category,
       features: Array.isArray(features) ? features : [String(features)],
     }));
-  } else if (Array.isArray(productSpecs)) {
-    specsArray = productSpecs as any;
   }
 
   return (
@@ -126,30 +130,58 @@ export default function ProductTabs({
           {specsArray && specsArray.length > 0 ? (
             <table className="w-full">
               <tbody>
-                {specsArray.map((spec, index) => (
-                  <tr
-                    key={index}
-                    className={
-                      index % 2 === 0 ? "bg-gray-50 dark:bg-gray-900/50" : ""
-                    }
-                  >
-                    <td className="px-6 py-4 font-medium text-gray-900 dark:text-gray-100 w-1/4 align-top">
-                      {spec.category}
-                    </td>
-                    <td className="px-6 py-4 text-gray-700 dark:text-gray-300">
-                      <ul className="space-y-2">
-                        {spec.features.map((feature, featureIndex) => (
-                          <li key={featureIndex} className="flex items-start">
-                            <span className="text-blue-600 dark:text-blue-400 mr-2 mt-1">
-                              •
-                            </span>
-                            <span>{feature}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </td>
-                  </tr>
-                ))}
+                {specsArray.map((spec, index) => {
+                  if ("title" in spec && "description" in spec) {
+                    return (
+                      <tr
+                        key={index}
+                        className={
+                          index % 2 === 0
+                            ? "bg-gray-50 dark:bg-gray-900/50"
+                            : ""
+                        }
+                      >
+                        <td className="px-6 py-4 font-medium text-gray-900 dark:text-gray-100 w-1/3 align-top text-left">
+                          {spec.title}
+                        </td>
+                        <td className="px-6 py-4 text-gray-700 dark:text-gray-300 w-2/3 text-right">
+                          {spec.description}
+                        </td>
+                      </tr>
+                    );
+                  } else if ("category" in spec && "features" in spec) {
+                    return (
+                      <tr
+                        key={index}
+                        className={
+                          index % 2 === 0
+                            ? "bg-gray-50 dark:bg-gray-900/50"
+                            : ""
+                        }
+                      >
+                        <td className="px-6 py-4 font-medium text-gray-900 dark:text-gray-100 w-1/3 align-top text-left">
+                          {spec.category}
+                        </td>
+                        <td className="px-6 py-4 text-gray-700 dark:text-gray-300 w-2/3 text-right">
+                          <ul className="space-y-2">
+                            {(Array.isArray(spec.features)
+                              ? spec.features
+                              : []
+                            ).map((feature: string, featureIndex: number) => (
+                              <li
+                                key={featureIndex}
+                                className="flex items-start justify-end"
+                              >
+                                <span>{feature}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </td>
+                      </tr>
+                    );
+                  }
+                  return null;
+                })}
               </tbody>
             </table>
           ) : (

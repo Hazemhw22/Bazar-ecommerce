@@ -29,6 +29,7 @@ export default async function ProductPage({
       updated_at,
       is_active,
       specifications,
+      properties,
       shops:shop_id ( id, name ),
       categories:category_id ( id, name, description, created_at, updated_at )
     `
@@ -58,6 +59,39 @@ export default async function ProductPage({
     updated_at: product.updated_at ?? "",
     is_active: product.is_active ?? true,
     specifications: product.specifications ?? null,
+    properties: product.properties ?? null,
+    categories: Array.isArray(product.categories)
+      ? product.categories.length > 0
+        ? {
+            id: String(product.categories[0].id),
+            name: String(product.categories[0].name),
+            description: product.categories[0].description ?? undefined,
+            created_at: product.categories[0].created_at ?? undefined,
+            updated_at: product.categories[0].updated_at ?? undefined,
+          }
+        : null
+      : product.categories
+      ? {
+          id: (product.categories as { id: string; name: string; description?: string; created_at?: string; updated_at?: string }).id,
+          name: (product.categories as { id: string; name: string; description?: string; created_at?: string; updated_at?: string }).name,
+          description: (product.categories as { id: string; name: string; description?: string; created_at?: string; updated_at?: string }).description ?? undefined,
+          created_at: (product.categories as { id: string; name: string; description?: string; created_at?: string; updated_at?: string }).created_at ?? undefined,
+          updated_at: (product.categories as { id: string; name: string; description?: string; created_at?: string; updated_at?: string }).updated_at ?? undefined,
+        }
+      : null,
+    shops: Array.isArray(product.shops)
+      ? product.shops.length > 0
+        ? {
+            id: String((product.shops[0] as { id: string; name: string }).id),
+            name: String((product.shops[0] as { id: string; name: string }).name),
+          }
+        : null
+      : product.shops && typeof product.shops === "object"
+      ? {
+          id: String((product.shops as { id: string; name: string }).id),
+          name: String((product.shops as { id: string; name: string }).name),
+        }
+      : null,
   };
 
   return (

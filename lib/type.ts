@@ -80,6 +80,15 @@ export type Product = {
   updated_at: string;
   is_active: boolean;
   specifications?: Record<string, any> | null;
+  properties?: { title: string; options: string[] }[] | null;
+  categories?: {
+    id: string;
+    name: string;
+    description?: string;
+    created_at?: string;
+    updated_at?: string;
+  } | null;
+  shops?: { id: string; name: string } | null;
 };
 
 // نوع الفئة

@@ -35,8 +35,9 @@ export default function ProductDetail({ product }: ProductDetailProps) {
   const [activeImage, setActiveImage] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [quantity, setQuantity] = useState(1);
-  const [selectedCapacity, setSelectedCapacity] = useState("128GB");
-  const [selectedColor, setSelectedColor] = useState("Black");
+  const [selectedProperties, setSelectedProperties] = useState<
+    Record<string, string>
+  >({});
 
   useEffect(() => {
     if (!product.category_id) return;
@@ -74,6 +75,15 @@ export default function ProductDetail({ product }: ProductDetailProps) {
         break;
     }
   };
+
+  // دالة لتغيير الخيار المختار
+  const handleSelectProperty = (title: string, option: string) => {
+    setSelectedProperties((prev) => ({ ...prev, [title]: option }));
+  };
+
+  // استخراج اسم المتجر واسم التصنيف من الحقول الديناميكية
+  const shopName = product.shops?.name;
+  const categoryName = product.categories?.name;
 
   if (!product)
     return <div className="p-6 text-red-500">المنتج غير موجود أو حدث خطأ.</div>;
@@ -170,11 +180,26 @@ export default function ProductDetail({ product }: ProductDetailProps) {
 
         {/* تفاصيل المنتج */}
         <div className="flex flex-col justify-between gap-6">
-          <div>
-            <h1 className="text-4xl font-extrabold mb-3 text-gray-900 dark:text-white">
+          <div className="space-y-6">
+            {/* اسم المنتج */}
+            <h1 className="text-4xl font-extrabold mb-2 text-gray-900 dark:text-white tracking-tight">
               {product.name}
             </h1>
-            <div className="flex items-center gap-4 my-6">
+            {/* تفاصيل أساسية */}
+            <div className="flex flex-wrap items-center gap-3 mb-4">
+              {shopName && (
+                <span className="bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-3 py-1 rounded-full text-sm font-semibold">
+                  {shopName}
+                </span>
+              )}
+              {categoryName && (
+                <span className="bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 px-3 py-1 rounded-full text-sm font-semibold">
+                  {categoryName}
+                </span>
+              )}
+            </div>
+            {/* السعر */}
+            <div className="flex items-center gap-4 mb-2">
               <span className="text-3xl font-bold text-primary">
                 ₪{product.discount_price ?? product.price}
               </span>
@@ -191,59 +216,40 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                   </span>
                 )}
             </div>
-            <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
+            {/* وصف المنتج */}
+            <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-4 text-base">
               {product.description}
             </p>
 
-            {product.category_id && (
-              <div className="mt-2 text-sm text-gray-500">
-                التصنيف:{" "}
-                <span className="font-semibold">{product.category_id}</span>
+            {/* خصائص المنتج الديناميكية */}
+            {product.properties && product.properties.length > 0 && (
+              <div className="space-y-4 mb-6">
+                {product.properties.map((prop) => (
+                  <div key={prop.title}>
+                    <label className="block text-sm font-medium mb-2 text-gray-800 dark:text-gray-200">
+                      {prop.title}
+                    </label>
+                    <div className="flex gap-2 flex-wrap">
+                      {prop.options.map((option) => (
+                        <button
+                          key={option}
+                          onClick={() =>
+                            handleSelectProperty(prop.title, option)
+                          }
+                          className={`px-4 py-2 border rounded-md text-sm font-medium transition-colors ${
+                            selectedProperties[prop.title] === option
+                              ? "border-blue-600 bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400"
+                              : "border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500"
+                          }`}
+                        >
+                          {option}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
-
-            <div className="space-y-4 mb-6">
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  اختر السعة:
-                </label>
-                <div className="flex gap-2">
-                  {["128GB", "256GB", "512GB"].map((capacity) => (
-                    <button
-                      key={capacity}
-                      onClick={() => setSelectedCapacity(capacity)}
-                      className={`px-4 py-2 border rounded-md text-sm font-medium transition-colors ${
-                        selectedCapacity === capacity
-                          ? "border-blue-600 bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400"
-                          : "border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500"
-                      }`}
-                    >
-                      {capacity}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  اختر اللون:
-                </label>
-                <div className="flex gap-2">
-                  {["Black", "White", "Blue", "Red"].map((color) => (
-                    <button
-                      key={color}
-                      onClick={() => setSelectedColor(color)}
-                      className={`px-4 py-2 border rounded-md text-sm font-medium transition-colors ${
-                        selectedColor === color
-                          ? "border-blue-600 bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400"
-                          : "border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500"
-                      }`}
-                    >
-                      {color}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
           </div>
 
           <div className="flex gap-2 w-full justify-center sm:justify-start mt-4">
