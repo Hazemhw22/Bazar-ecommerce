@@ -60,6 +60,8 @@ export type Shop = {
   is_active: boolean;
   working_hours?: WorkingHours[] | null;
   timezone?: string | null;
+  delivery_time_from?: number | null; // delivery time in minutes
+  delivery_time_to?: number | null; // delivery time in minutes
   created_at: string;
   updated_at: string;
 };

@@ -37,6 +37,9 @@ type ShopWithDetails = Shop & {
   logo_url?: string | null;
   address?: string | null;
   working_hours?: WorkingHours[] | null;
+  ownerName?: string | null;
+  delivery_time_from?: number | null;
+  delivery_time_to?: number | null;
 };
 type SortOption = "rating" | "products" | "alphabetical" | "newest";
 
@@ -61,21 +64,31 @@ export default function ShopsPage() {
         .select("*");
       // جلب التصنيفات
       const { data: cats } = await supabase.from("categories").select("*");
+      // جلب بيانات المالكين
+      const { data: profiles } = await supabase.from("profiles").select("id, full_name");
+      
       if (!shopsError && shops && cats) {
         setCategories(cats);
         // جلب المنتجات لكل متجر
         const { data: products } = await supabase
           .from("products")
-          .select("shop_id");
+          .select("shop_id, category_id");
         const shopsWithCount = shops.map((shop) => {
           const count = products
             ? products.filter((p) => p.shop_id === shop.id).length
             : 0;
+          const ownerProfile = profiles?.find((profile) => profile.id === shop.owner_id);
+          
+          // Get the most common category for this shop's products
+          const shopProducts = products?.filter((p) => p.shop_id === shop.id) || [];
+          const productCategories = shopProducts.map((p) => p.category_id);
+          const mostCommonCategory = productCategories.length > 0 
+            ? cats.find((cat) => cat.id === productCategories[0])?.name || ""
+            : "";
+          
           return {
             ...shop,
-            categoryTitle:
-              cats.find((cat) => cat.id === shop.category_id)?.name ||
-              "بدون تصنيف",
+            categoryTitle: mostCommonCategory,
             productsCount: count,
             shop_desc: shop.description || "",
             shop_name: shop.name,
@@ -83,6 +96,9 @@ export default function ShopsPage() {
             logo_url: shop.logo_url || "",
             address: shop.address || "",
             working_hours: shop.working_hours || [],
+            ownerName: ownerProfile?.full_name || "Unknown Owner",
+            delivery_time_from: shop.delivery_time_from || null,
+            delivery_time_to: shop.delivery_time_to || null,
           };
         });
         setShopsData(shopsWithCount);
@@ -221,7 +237,7 @@ export default function ShopsPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {paginatedShops.map((shop) => (
+            {paginatedShops.map((shop: ShopWithDetails) => (
               <Card
                 key={shop.id}
                 className="overflow-hidden hover:shadow-lg transition-all duration-300 group"
@@ -266,7 +282,7 @@ export default function ShopsPage() {
                         {shop.shop_name}
                       </h3>
                       <span className="text-xs text-gray-400 whitespace-nowrap ms-auto">
-                        {shop.categoryTitle}
+                        {shop.ownerName}
                       </span>
                     </div>
 
@@ -303,7 +319,12 @@ export default function ShopsPage() {
                         <div className="flex items-center gap-1 mb-1">
                           <Clock className="h-4 w-4 text-green-500" />
                           <span className="font-semibold text-gray-900 dark:text-white text-xs">
-                            {/* {shop.delivery_time ?? "-"} */}
+                            {shop.delivery_time_from && shop.delivery_time_to 
+                              ? `${shop.delivery_time_from}-${shop.delivery_time_to}m`
+                              : shop.delivery_time_from 
+                                ? `${shop.delivery_time_from}m`
+                                : "-"
+                            }
                           </span>
                         </div>
                         <span className="text-xs text-gray-500 dark:text-gray-400">
@@ -312,9 +333,11 @@ export default function ShopsPage() {
                       </div>
                     </div>
                     {/* الكاتيجوري */}
-                    <div className="flex items-center gap-2 mb-1">
-                      <Badge>{shop.categoryTitle}</Badge>
-                    </div>
+                    {shop.categoryTitle && (
+                      <div className="flex items-center gap-2 mb-1">
+                        <Badge>{shop.categoryTitle}</Badge>
+                      </div>
+                    )}
                     {/* الموقع */}
                     <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 mb-1">
                       <MapPin className="h-4 w-4" />

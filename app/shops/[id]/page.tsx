@@ -290,11 +290,19 @@ export default function ShopDetailPage() {
               </span>
             </div>
             <div className="flex flex-col items-center">
+              <div className="flex items-center gap-1 mb-2">
+                <Clock className="h-6 w-6 text-green-500" />
+                <span className="text-lg font-semibold text-gray-900 dark:text-white">
+                  {shop.delivery_time_from && shop.delivery_time_to 
+                    ? `${shop.delivery_time_from}-${shop.delivery_time_to}m`
+                    : shop.delivery_time_from 
+                      ? `${shop.delivery_time_from}m`
+                      : "Not set"
+                  }
+                </span>
+              </div>
               <span className="text-sm text-gray-600 dark:text-gray-400">
-                Shop Owner
-              </span>
-              <span className="text-xs text-gray-500 dark:text-gray-500 mt-1">
-                {shop.created_at?.slice(0, 10).split("-").reverse().join(".")}
+                Delivery Time
               </span>
             </div>
           </div>
