@@ -70,18 +70,10 @@ const SiteFooter: React.FC = () => {
             <ul className="space-y-2 text-sm">
               <li>
                 <Link
-                  href="/stores/become-owner"
+                  href="/shops"
                   className="hover:text-blue-600 dark:hover:text-blue-400"
                 >
-                  Become a Store Owner
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/delivery/become-driver"
-                  className="hover:text-blue-600 dark:hover:text-blue-400"
-                >
-                  Become a Delivery Man
+                  Browse Shops
                 </Link>
               </li>
               <li>
@@ -94,18 +86,10 @@ const SiteFooter: React.FC = () => {
               </li>
               <li>
                 <Link
-                  href="/privacy"
+                  href="/contact"
                   className="hover:text-blue-600 dark:hover:text-blue-400"
                 >
-                  Privacy Policy
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/terms"
-                  className="hover:text-blue-600 dark:hover:text-blue-400"
-                >
-                  Terms & Conditions
+                  Contact Us
                 </Link>
               </li>
             </ul>

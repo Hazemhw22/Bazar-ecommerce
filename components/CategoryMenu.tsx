@@ -48,7 +48,7 @@ export default function CategoryMenu() {
                     className="w-5 h-5 inline"
                   />
                 ) : (
-                  fallbackIcons[idx % fallbackIcons.length]
+                  <span className="text-lg">{fallbackIcons[idx % fallbackIcons.length]}</span>
                 )}
               </span>
               {cat.name}
@@ -72,7 +72,7 @@ export default function CategoryMenu() {
                   className="w-5 h-5 inline"
                 />
               ) : (
-                fallbackIcons[idx % fallbackIcons.length]
+                <span className="text-lg">{fallbackIcons[idx % fallbackIcons.length]}</span>
               )}
             </span>
             <span className="text-left">{cat.name}</span>

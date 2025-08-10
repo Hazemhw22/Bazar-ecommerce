@@ -1,25 +1,11 @@
-// تعريفات الأنواع لمشروع التجارة الإلكترونية
+# Database Tables & Types
 
-// نوع المستخدم الأساسي من Supabase Auth
-export type User = {
-  id: string;
-  email?: string;
-  created_at?: string;
-  updated_at?: string;
-  last_sign_in_at?: string;
-  app_metadata?: {
-    provider?: string;
-    [key: string]: any;
-  };
-  user_metadata?: {
-    [key: string]: any;
-  };
-  aud?: string;
-};
+## Core Tables
 
-// نوع الملف الشخصي المرتبط بالمستخدم
+### 1. **profiles** (User Profiles)
+```typescript
 export type Profile = {
-  id: string; // يرتبط بـ auth.users.id
+  id: string; // UUID - linked to auth.users.id
   full_name: string | null;
   email: string;
   role: UserRole;
@@ -30,28 +16,21 @@ export type Profile = {
   address?: string | null;
 };
 
-// أدوار المستخدمين
 export enum UserRole {
   ADMIN = "admin",
-  CUSTOMER = "customer",
+  CUSTOMER = "customer", 
   VENDOR = "vendor",
   STAFF = "staff",
 }
+```
 
-// نوع ساعات العمل
-export type WorkingHours = {
-  day: string;
-  open_time: string;
-  close_time: string;
-  is_open: boolean;
-};
-
-// نوع المتجر
+### 2. **shops** (Stores)
+```typescript
 export type Shop = {
-  id: string;
+  id: string; // UUID
   name: string;
   description?: string | null;
-  owner_id: string;
+  owner_id: string; // UUID - references profiles.id
   email: string;
   phone_number?: string | null;
   address?: string | null;
@@ -60,22 +39,44 @@ export type Shop = {
   is_active: boolean;
   working_hours?: WorkingHours[] | null;
   timezone?: string | null;
-  delivery_time_from?: number | null; // delivery time in minutes
-  delivery_time_to?: number | null; // delivery time in minutes
+  delivery_time_from?: number | null; // minutes
+  delivery_time_to?: number | null; // minutes
   created_at: string;
   updated_at: string;
 };
 
-// نوع المنتج
+export type WorkingHours = {
+  day: string;
+  open_time: string;
+  close_time: string;
+  is_open: boolean;
+};
+```
+
+### 3. **categories** (Product Categories)
+```typescript
+export type Category = {
+  id: string; // UUID
+  name: string;
+  description?: string | null;
+  parent_id?: string | null; // UUID - self-reference for subcategories
+  logo_url?: string | null;
+  created_at: string;
+  updated_at: string;
+};
+```
+
+### 4. **products** (Products)
+```typescript
 export type Product = {
-  id: string;
+  id: string; // UUID
   name: string;
   description: string | null;
   price: number;
   discount_price?: number | null;
   stock_quantity: number;
-  category_id: string;
-  shop_id: string;
+  category_id: string; // UUID - references categories.id
+  shop_id: string; // UUID - references shops.id
   main_image?: string | null;
   images: string[] | null;
   created_at: string;
@@ -83,43 +84,14 @@ export type Product = {
   is_active: boolean;
   specifications?: Record<string, any> | null;
   properties?: { title: string; options: string[] }[] | null;
-  categories?: {
-    id: string;
-    name: string;
-    description?: string;
-    created_at?: string;
-    updated_at?: string;
-  } | null;
-  shops?: { id: string; name: string } | null;
 };
+```
 
-// نوع الفئة
-export type Category = {
-  id: string;
-  name: string;
-  description?: string | null;
-  parent_id?: string | null;
-  logo_url?: string | null;
-  created_at: string;
-  updated_at: string;
-};
-
-// نوع العنوان
-export type Address = {
-  full_name: string;
-  address_line1: string;
-  address_line2?: string;
-  city: string;
-  state: string;
-  postal_code: string;
-  country: string;
-  phone_number: string;
-};
-
-// نوع الطلب
+### 5. **orders** (Orders)
+```typescript
 export type Order = {
-  id: string;
-  customer_id: string;
+  id: string; // UUID
+  customer_id: string; // UUID - references profiles.id
   status: OrderStatus;
   total_amount: number;
   shipping_address: Address;
@@ -132,29 +104,15 @@ export type Order = {
   notes?: string | null;
 };
 
-// نوع عنصر الطلب
-export type OrderItem = {
-  id: string;
-  order_id: string;
-  product_id: string;
-  quantity: number;
-  unit_price: number;
-  total_price: number;
-  product_name: string;
-  product_image?: string | null;
-};
-
-// حالة الطلب
 export enum OrderStatus {
   PENDING = "pending",
-  PROCESSING = "processing",
+  PROCESSING = "processing", 
   SHIPPED = "shipped",
   DELIVERED = "delivered",
   CANCELLED = "cancelled",
   RETURNED = "returned",
 }
 
-// حالة الدفع
 export enum PaymentStatus {
   PENDING = "pending",
   PAID = "paid",
@@ -162,7 +120,6 @@ export enum PaymentStatus {
   REFUNDED = "refunded",
 }
 
-// طريقة الدفع
 export enum PaymentMethod {
   CREDIT_CARD = "credit_card",
   DEBIT_CARD = "debit_card",
@@ -171,53 +128,90 @@ export enum PaymentMethod {
   CASH_ON_DELIVERY = "cash_on_delivery",
 }
 
-// نوع المراجعة
+export type Address = {
+  full_name: string;
+  address_line1: string;
+  address_line2?: string;
+  city: string;
+  state: string;
+  postal_code: string;
+  country: string;
+  phone_number: string;
+};
+```
+
+### 6. **order_items** (Order Items)
+```typescript
+export type OrderItem = {
+  id: string; // UUID
+  order_id: string; // UUID - references orders.id
+  product_id: string; // UUID - references products.id
+  quantity: number;
+  unit_price: number;
+  total_price: number;
+  product_name: string;
+  product_image?: string | null;
+};
+```
+
+### 7. **reviews** (Product Reviews)
+```typescript
 export type Review = {
-  id: string;
-  product_id: string;
-  customer_id: string;
+  id: string; // UUID
+  product_id: string; // UUID - references products.id
+  customer_id: string; // UUID - references profiles.id
   rating: number;
   comment: string;
   created_at: string;
   updated_at: string;
 };
+```
 
-// نوع السلة
+### 8. **carts** (Shopping Carts)
+```typescript
 export type Cart = {
-  id: string;
-  customer_id: string;
+  id: string; // UUID
+  customer_id: string; // UUID - references profiles.id
   created_at: string;
   updated_at: string;
 };
+```
 
-// نوع عنصر السلة
+### 9. **cart_items** (Cart Items)
+```typescript
 export type CartItem = {
-  id: string;
-  cart_id: string;
-  product_id: string;
+  id: string; // UUID
+  cart_id: string; // UUID - references carts.id
+  product_id: string; // UUID - references products.id
   quantity: number;
   added_at: string;
 };
+```
 
-// نوع قائمة الرغبات
+### 10. **wishlists** (Favorites/Wishlist)
+```typescript
 export type Wishlist = {
-  id: string;
-  customer_id: string;
-  product_id: string;
+  id: string; // UUID
+  customer_id: string; // UUID - references profiles.id
+  product_id: string; // UUID - references products.id
   added_at: string;
 };
+```
 
-// نوع الإشعارات
+### 11. **notifications** (User Notifications)
+```typescript
 export type Notification = {
-  id: string;
-  user_id: string;
+  id: string; // UUID
+  user_id: string; // UUID - references profiles.id
   message: string;
   created_at: string;
 };
+```
 
-// نوع الكوبونات
+### 12. **coupons** (Discount Coupons)
+```typescript
 export type Coupon = {
-  id: string;
+  id: string; // UUID
   code: string;
   discount_type: string;
   discount_value: number;
@@ -227,14 +221,58 @@ export type Coupon = {
   created_at: string;
   updated_at: string;
 };
+```
 
-// Types
-export interface Offer {
-  id: string;
+## Homepage Management Tables
+
+### 13. **homepage_offers** (Special Offers)
+```typescript
+export interface Offer = {
+  id: string; // UUID
   title: string;
-  homepage_offer_products?: { id: string; offer_id: string; product_id: string }[];
-}
+  created_at?: string;
+  updated_at?: string;
+};
+```
 
+### 14. **homepage_offer_products** (Offer-Product Relationships)
+```typescript
+export type HomepageOfferProduct = {
+  id: string; // UUID
+  offer_id: string; // UUID - references homepage_offers.id
+  product_id: string; // UUID - references products.id
+};
+```
+
+### 15. **homepage_featured_stores** (Featured Stores)
+```typescript
+export type HomepageFeaturedStore = {
+  id: string; // UUID
+  shop_id: string; // UUID - references shops.id
+  position: number; // Display order
+  is_active: boolean;
+  created_at?: string;
+  updated_at?: string;
+};
+```
+
+### 16. **homepage_sections** (Homepage Sections)
+```typescript
+export type HomepageSection = {
+  id: string; // UUID
+  shop_id: string; // UUID - references shops.id
+  position: number; // Display order
+  is_active: boolean;
+  title?: string;
+  created_at?: string;
+  updated_at?: string;
+};
+```
+
+## Helper Types
+
+### 17. **ShopPreview** (Lightweight Shop Data)
+```typescript
 export type ShopPreview = {
   id: string;
   name: string;
@@ -244,27 +282,11 @@ export type ShopPreview = {
   background_image_url?: string | null;
   position?: number;
 };
+```
 
+## Database Interface
 
-
-// Homepage Offer Product Relationship
-export type HomepageOfferProduct = {
-  id: string;
-  offer_id: string;
-  product_id: string;
-};
-
-// Homepage Featured Store
-export type HomepageFeaturedStore = {
-  id: string;
-  shop_id: string;
-  position: number;
-  is_active: boolean;
-  created_at?: string;
-  updated_at?: string;
-};
-
-// واجهات Database للاستخدام مع Supabase
+```typescript
 export interface Database {
   public: {
     Tables: {
@@ -325,10 +347,7 @@ export interface Database {
       };
       coupons: {
         Row: Coupon;
-        Insert: Omit<
-          Coupon,
-          "id" | "created_at" | "updated_at" | "usage_count"
-        >;
+        Insert: Omit<Coupon, "id" | "created_at" | "updated_at" | "usage_count">;
         Update: Partial<Omit<Coupon, "id" | "created_at" | "updated_at">>;
       };
       homepage_offers: {
@@ -346,32 +365,38 @@ export interface Database {
         Insert: Omit<HomepageFeaturedStore, "id" | "created_at" | "updated_at">;
         Update: Partial<Omit<HomepageFeaturedStore, "id" | "created_at" | "updated_at">>;
       };
-
+      homepage_sections: {
+        Row: HomepageSection;
+        Insert: Omit<HomepageSection, "id" | "created_at" | "updated_at">;
+        Update: Partial<Omit<HomepageSection, "id" | "created_at" | "updated_at">>;
+      };
     };
   };
 }
+```
 
-// نوع استجابة Supabase
-export type SupabaseResponse<T> = {
-  data: T | null;
-  error: Error | null;
-};
+## Summary
 
-// أنواع مساعدة للإدراج والتحديث
-export type ShopInsert = Database["public"]["Tables"]["shops"]["Insert"];
-export type ShopUpdate = Database["public"]["Tables"]["shops"]["Update"];
-export type ProductInsert = Database["public"]["Tables"]["products"]["Insert"];
-export type ProductUpdate = Database["public"]["Tables"]["products"]["Update"];
-export type CategoryInsert =
-  Database["public"]["Tables"]["categories"]["Insert"];
-export type CategoryUpdate =
-  Database["public"]["Tables"]["categories"]["Update"];
+**Total Tables: 16**
 
-// Homepage Management Types
-export type HomepageOfferInsert = Database["public"]["Tables"]["homepage_offers"]["Insert"];
-export type HomepageOfferUpdate = Database["public"]["Tables"]["homepage_offers"]["Update"];
-export type HomepageOfferProductInsert = Database["public"]["Tables"]["homepage_offer_products"]["Insert"];
-export type HomepageOfferProductUpdate = Database["public"]["Tables"]["homepage_offer_products"]["Update"];
-export type HomepageFeaturedStoreInsert = Database["public"]["Tables"]["homepage_featured_stores"]["Insert"];
-export type HomepageFeaturedStoreUpdate = Database["public"]["Tables"]["homepage_featured_stores"]["Update"];
+### Core E-commerce Tables (12):
+1. profiles
+2. shops  
+3. categories
+4. products
+5. orders
+6. order_items
+7. reviews
+8. carts
+9. cart_items
+10. wishlists
+11. notifications
+12. coupons
 
+### Homepage Management Tables (4):
+13. homepage_offers
+14. homepage_offer_products
+15. homepage_featured_stores
+16. homepage_sections
+
+All tables use UUID primary keys and include proper foreign key relationships for data integrity. 

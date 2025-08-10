@@ -254,6 +254,60 @@ export default function ShopDetailPage() {
         </div>
       </div>
 
+      {/* Shop Details Section */}
+      <div className="container mx-auto px-4 py-6">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6">
+          {/* Description */}
+          {shop.description && (
+            <div className="mb-4">
+              <h2 className="text-lg font-semibold mb-1 text-gray-900 dark:text-white">عن المتجر</h2>
+              <p className="text-gray-700 dark:text-gray-300">{shop.description}</p>
+            </div>
+          )}
+          {/* Address */}
+          {shop.address && (
+            <div className="mb-4 flex items-center gap-2">
+              <MapPin className="h-5 w-5 text-blue-500" />
+              <span className="text-gray-800 dark:text-gray-200">{shop.address}</span>
+            </div>
+          )}
+          {/* Working Hours */}
+          {shop.working_hours && Array.isArray(shop.working_hours) && shop.working_hours.length > 0 && (
+            <div className="mb-2">
+              <h3 className="text-md font-semibold mb-2 text-gray-900 dark:text-white">ساعات العمل</h3>
+              <div className="overflow-x-auto">
+                <table className="min-w-[300px] w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                  <thead className="text-xs text-gray-700 uppercase bg-gray-100 dark:bg-gray-700 dark:text-gray-200">
+                    <tr>
+                      <th scope="col" className="px-3 py-2">اليوم</th>
+                      <th scope="col" className="px-3 py-2">الحالة</th>
+                      <th scope="col" className="px-3 py-2">من</th>
+                      <th scope="col" className="px-3 py-2">إلى</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {shop.working_hours.map((wh) => (
+                      <tr key={wh.day} className={wh.is_open ? "bg-white dark:bg-gray-800" : "bg-gray-50 dark:bg-gray-900"}>
+                        <td className="px-3 py-2 font-medium">{wh.day}</td>
+                        <td className="px-3 py-2">
+                          {wh.is_open ? (
+                            <span className="text-green-600 dark:text-green-400 font-semibold">مفتوح</span>
+                          ) : (
+                            <span className="text-red-500 font-semibold">مغلق</span>
+                          )}
+                        </td>
+                        <td className="px-3 py-2">{wh.is_open ? wh.open_time : "-"}</td>
+                        <td className="px-3 py-2">{wh.is_open ? wh.close_time : "-"}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
       {/* Shop Stats */}
       <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
         <div className="container mx-auto px-4 py-6">
