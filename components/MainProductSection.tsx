@@ -40,22 +40,27 @@ export default function MainProductSection({
     async function fetchProducts() {
       setLoading(true);
       
-      // If offer is provided, fetch products from homepage_offer_products
       if (offer?.homepage_offer_products && offer.homepage_offer_products.length > 0) {
-        const productIds = offer.homepage_offer_products.map(item => item.product_id);
-        const { data, error } = await supabase
-          .from("products")
-          .select("*")
-          .in("id", productIds)
-          .eq("is_active", true);
-        
-        if (!error && data) {
-          setProducts(data);
+        const productIds = Array.from(new Set(offer.homepage_offer_products
+          .map((item) => item.product_id)
+          .filter((id): id is string => Boolean(id))));
+
+        if (productIds.length > 0) {
+          const { data, error } = await supabase
+            .from("products")
+            .select("*")
+            .in("id", productIds)
+            .eq("is_active", true);
+
+          if (!error && data) {
+            setProducts(data);
+          } else {
+            setProducts([]);
+          }
         } else {
           setProducts([]);
         }
       } else {
-        // Default product fetching
         const { data, error } = await supabase
           .from("products")
           .select("*")

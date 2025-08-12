@@ -19,66 +19,65 @@ export default function Home() {
   useEffect(() => {
     async function fetchData() {
       try {
-        // Fetch offers - try complex query first
-        let offersData: any[] | null = null;
-        let offersError: any = null;
+        setLoading(true);
         
-        try {
-          // Fetch homepage offers
-          const { data, error } = await supabase
-            .from("homepage_offers")
-            .select(`
-              id,
-              title,
-              homepage_offer_products (
-                id,
-                offer_id,
-                product_id
-              )
-            `)
-            .order("id", { ascending: false })
-            .limit(10);
-          
-          if (error) {
-            console.error("Error fetching offers:", error);
-            offersError = error;
-            offersData = [];
-          } else {
-            console.log("Fetched offers:", data);
-            console.log("Number of offers:", data?.length || 0);
-            if (data && data.length > 0) {
-              console.log("First offer details:", data[0]);
-              console.log("All offers:", data);
-            }
-            offersData = data;
-            offersError = null;
-          }
-        } catch (queryError) {
-          console.error("Query failed:", queryError);
-          offersError = queryError as any;
-          offersData = [];
-        }
+        // First, fetch all offers
+        const { data: offers, error: offersError } = await supabase
+          .from("homepage_offers")
+          .select("*")
+          .order("created_at", { ascending: false })
+          .limit(10);
 
         if (offersError) {
-          console.error("Error fetching offers:", JSON.stringify(offersError, null, 2));
-          console.error("Error details:", {
-            message: offersError.message,
-            details: offersError.details,
-            hint: offersError.hint,
-            code: offersError.code
-          });
+          console.error("Error fetching offers:", offersError);
           setHomepageOffers([]);
         } else {
-          console.log("Successfully fetched offers:", offersData);
-          console.log("Number of offers found:", offersData?.length || 0);
-          if (offersData && offersData.length > 0) {
-            console.log("First offer:", offersData[0]);
-            console.log("All offers:", offersData);
+          console.log("Successfully fetched offers:", offers);
+          console.log("Number of offers found:", offers?.length || 0);
+          
+          if (!offers || offers.length === 0) {
+            console.log("No offers found in database");
+            setHomepageOffers([]);
+            return;
           }
-          setHomepageOffers(offersData || []);
+          
+          // For each offer, fetch its products (IDs only)
+          const offersWithProducts = await Promise.all(
+            (offers || []).map(async (offer) => {
+              const { data: offerProducts, error: productError } = await supabase
+                .from("homepage_offer_products")
+                .select(`
+                  id,
+                  offer_id,
+                  product_id
+                `)
+                .eq("offer_id", offer.id);
+
+              if (productError) {
+                console.error(`Error fetching products for offer ${offer.id}:`, productError);
+              }
+
+              return {
+                ...offer,
+                homepage_offer_products: offerProducts || []
+              };
+            })
+          );
+          
+          console.log("Offers with products:", offersWithProducts);
+          
+          // Filter out offers that have no related products
+          const validOffers = offersWithProducts.filter(offer => 
+            offer.homepage_offer_products && 
+            offer.homepage_offer_products.length > 0
+          );
+          
+          console.log("Valid offers with products:", validOffers);
+          console.log("Number of valid offers:", validOffers.length);
+          setHomepageOffers(validOffers);
         }
 
-        // Set default title since homepage_sections table doesn't exist
+        // Set default title
         setDefaultTitle("منتجات مميزة");
 
       } catch (error) {
@@ -108,6 +107,29 @@ export default function Home() {
           </div>
         ) : (
           <>
+            {/* Debug info when no offers */}
+            {homepage_offers.length === 0 && (
+              <div className="text-center py-8 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                <h3 className="text-lg font-semibold text-yellow-800 dark:text-yellow-200 mb-2">
+                  لا توجد عروض متاحة
+                </h3>
+                <p className="text-yellow-700 dark:text-yellow-300 text-sm">
+                  تحقق من قاعدة البيانات أو أضف عروض جديدة
+                </p>
+                <details className="mt-4 text-left">
+                  <summary className="cursor-pointer text-yellow-600 dark:text-yellow-400 text-sm">
+                    معلومات التصحيح
+                  </summary>
+                  <div className="mt-2 text-xs text-yellow-600 dark:text-yellow-400 bg-white dark:bg-gray-800 p-3 rounded">
+                    <p>• تأكد من وجود بيانات في جدول homepage_offers</p>
+                    <p>• تأكد من وجود بيانات في جدول homepage_offer_products</p>
+                    <p>• تأكد من وجود منتجات نشطة في جدول products</p>
+                    <p>• تحقق من سياسات RLS في Supabase</p>
+                  </div>
+                </details>
+              </div>
+            )}
+            
             {/* Display each offer as a separate section */}
             {homepage_offers.length > 0 ? (
               homepage_offers.map((offer: Offer, index: number) => (

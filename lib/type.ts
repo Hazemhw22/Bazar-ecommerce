@@ -232,7 +232,9 @@ export type Coupon = {
 export interface Offer {
   id: string;
   title: string;
-  homepage_offer_products?: { id: string; offer_id: string; product_id: string }[];
+  created_at?: string;
+  updated_at?: string;
+  homepage_offer_products?: HomepageOfferProduct[];
 }
 
 export type ShopPreview = {
@@ -252,6 +254,7 @@ export type HomepageOfferProduct = {
   id: string;
   offer_id: string;
   product_id: string;
+  products?: Product | null; // Single product object from nested select
 };
 
 // Homepage Featured Store

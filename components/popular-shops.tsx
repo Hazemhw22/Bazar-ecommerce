@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Clock, Package, Star } from "lucide-react";
+import { MapPin, Star } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { supabase } from "@/lib/supabase";
@@ -17,36 +17,66 @@ export function PopularShops() {
   useEffect(() => {
     async function fetchFeaturedShops() {
       try {
-        const { data, error } = await supabase
+        // Step 1: Fetch featured rows
+        const { data: featured, error: featuredError } = await supabase
           .from("homepage_featured_stores")
-          .select(`
-            id,
-            position,
-            is_active,
-            shops:shop_id (
-              id,
-              name,
-              logo_url,
-              description,
-              address,
-              background_image_url
-            )
-          `)
+          .select("id, position, is_active, shop_id")
           .eq("is_active", true)
           .order("position", { ascending: true })
           .limit(6);
 
-        if (error) {
-          console.error("Error fetching featured shops:", error);
+        if (featuredError || !featured || featured.length === 0) {
+          if (featuredError) console.error("Error fetching featured rows:", featuredError);
           setFeaturedShops([]);
-        } else {
-          // Process the data to flatten the shops array
-          const processedShops = (data || []).map((item: any) => ({
-            ...item.shops,
-            position: item.position
-          }));
-          setFeaturedShops(processedShops);
+          return;
         }
+
+        // Step 2: Fetch shops by IDs
+        const shopIds = Array.from(new Set(featured.map((f) => f.shop_id).filter(Boolean)));
+        if (shopIds.length === 0) {
+          setFeaturedShops([]);
+          return;
+        }
+
+        const { data: shops, error: shopsError } = await supabase
+          .from("shops")
+          .select("id, name, logo_url, description, address, background_image_url, is_active")
+          .in("id", shopIds)
+          .eq("is_active", true);
+
+        if (shopsError || !shops) {
+          if (shopsError) {
+            // Better diagnostics
+            console.error("Error fetching shops:", shopsError);
+            try {
+              console.error("Shops error details:", JSON.stringify(shopsError, null, 2));
+            } catch {}
+          } else {
+            console.warn("Shops query returned null data. This is usually due to RLS blocking SELECT on shops. Ensure a public read policy exists allowing is_active = true.");
+          }
+          setFeaturedShops([]);
+          return;
+        }
+
+        // Build list in the order of positions
+        const shopById = new Map(shops.map((s) => [s.id, s]));
+        const processed: ShopPreview[] = featured
+          .map((f) => {
+            const s = shopById.get(f.shop_id);
+            if (!s) return null;
+            return {
+              id: s.id,
+              name: s.name,
+              logo_url: s.logo_url ?? undefined,
+              description: s.description ?? undefined,
+              address: s.address ?? undefined,
+              background_image_url: s.background_image_url ?? undefined,
+              position: f.position,
+            } as ShopPreview;
+          })
+          .filter((x): x is ShopPreview => x !== null);
+
+        setFeaturedShops(processed);
       } catch (error) {
         console.error("Error fetching featured shops:", error);
         setFeaturedShops([]);
