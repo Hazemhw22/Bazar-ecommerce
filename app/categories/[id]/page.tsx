@@ -46,7 +46,7 @@ type ViewMode = "grid" | "list";
 
 export default function CategoryDetailPage() {
   const params = useParams();
-  const categoryId = Number(params?.id as string);
+  const categoryId = params?.id as string;
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<SortOption>("name");
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
