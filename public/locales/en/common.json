@@ -1,0 +1,19 @@
+{
+  "siteTitle": "Bazar - E-commerce Store",
+  "welcome": "Welcome to Bazar!",
+  "products": "Products",
+  "shops": "Shops",
+  "categories": "Categories",
+  "cart": "Cart",
+  "checkout": "Checkout",
+  "orders": "Orders",
+  "favourites": "Favourites",
+  "account": "Account",
+  "search": "Search...",
+  "addToCart": "Add to Cart",
+  "viewShop": "View Shop",
+  "viewDetails": "View Details",
+  "language": "Language",
+  "arabic": "Arabic",
+  "english": "English"
+}

@@ -2,11 +2,15 @@ import type React from "react";
 import "./globals.css";
 import AppProviders from "../components/AppProviders";
 import BreadcrumbsNav from "../components/BreadcrumbsNav";
-import FixedButtons from "../components/fixed-buttons"; // تأكد من الاستيراد
 
 export const metadata = {
-  title: "Bazar-ecommerce",
-  description: "Next.js + Tailwind UI Store",
+  title: "KlikMart",
+  description: "KlikMart - Your modern online marketplace",
+  icons: {
+    icon: "/LOGO KLIKMART.png",
+    shortcut: "/LOGO KLIKMART.png",
+    apple: "/LOGO KLIKMART.png",
+  },
 };
 
 export default function RootLayout({
@@ -18,7 +22,6 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className="bg-background text-foreground transition-colors duration-300">
         <AppProviders>
-          <FixedButtons /> {/* ✅ هنا فوق الـ BreadcrumbsNav */}
           <BreadcrumbsNav />
           <main className=" max-w-7xl mx-auto">{children}</main>
         </AppProviders>

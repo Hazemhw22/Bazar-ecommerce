@@ -73,36 +73,50 @@ export default function CategoryDetailPage() {
 
   // جلب المنتجات المرتبطة بالكاتيجوري مع بيانات الشوب
   const [products, setProducts] = useState<Product[]>([]);
+  const [shopsData, setShopsData] = useState<Record<string, Shop>>({});
   useEffect(() => {
     supabase
       .from("products")
       .select("*")
       .eq("category_id", categoryId)
-      .then(({ data }) => {
+      .then(async ({ data }) => {
         setProducts(data || []);
+        // جلب بيانات المتاجر الحقيقية
+        const shopIds = Array.from(
+          new Set(
+            (data || [])
+              .map((p) => p.shop_id)
+              .filter(Boolean)
+          )
+        );
+        if (shopIds.length > 0) {
+          const { data: shopsArr } = await supabase
+            .from("shops")
+            .select(
+              "id, name, logo_url, address, owner_id, email, is_active, created_at, updated_at"
+            )
+            .in("id", shopIds);
+          const shopsMap: Record<string, Shop> = {};
+          (shopsArr || []).forEach((shop) => {
+            shopsMap[shop.id] = shop;
+          });
+          setShopsData(shopsMap);
+        } else {
+          setShopsData({});
+        }
       });
   }, [categoryId]);
 
-  // استخراج المتاجر من المنتجات حسب shop_id فقط
+  // استخراج المتاجر من المنتجات حسب shop_id فقط مع بيانات حقيقية
   const shops: Shop[] = useMemo(() => {
     const unique: Record<string, Shop> = {};
     products.forEach((p) => {
-      if (p.shop_id) {
-        unique[p.shop_id] = {
-          id: p.shop_id,
-          name: "", // يمكن جلب اسم المتجر لاحقاً من قاعدة البيانات إذا لزم الأمر
-          logo_url: "",
-          address: "",
-          owner_id: "",
-          email: "",
-          is_active: true,
-          created_at: "",
-          updated_at: "",
-        };
+      if (p.shop_id && shopsData[p.shop_id]) {
+        unique[p.shop_id] = shopsData[p.shop_id];
       }
     });
     return Object.values(unique);
-  }, [products]);
+  }, [products, shopsData]);
 
   // الفلاتر والبحث والفرز بناءً على الحقول الجديدة فقط
   const filteredAndSortedProducts = useMemo(() => {
@@ -543,11 +557,9 @@ export default function CategoryDetailPage() {
                   </div>
                 </div>
               </div>
-              {/* Shops Grid */}
+              {/* Shops Grid as Cards */}
               {shops.length === 0 ? (
-                <div className="text-gray-500">
-                  No shops found for this category.
-                </div>
+                <div className="text-gray-500">No shops found for this category.</div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                   {shops
@@ -562,17 +574,36 @@ export default function CategoryDetailPage() {
                         (p) => p.shop_id === shop.id
                       ).length;
                       return (
-                        <Card key={shop.id}>
-                          <Image
-                            src={shop.logo_url || "/placeholder.svg"}
-                            alt={shop.name}
-                            width={80}
-                            height={80}
-                          />
-                          <div>{shop.name}</div>
-                          {shop.address && <div>{shop.address}</div>}
-                          <div>{shopProductsCount} Products</div>
-                          <Link href={`/shops/${shop.id}`}>View Shop</Link>
+                        <Card
+                          key={shop.id}
+                          className="flex flex-col items-center p-6 bg-white dark:bg-gray-800 rounded-xl shadow hover:shadow-lg transition-all border border-gray-200 dark:border-gray-700"
+                        >
+                          <div className="w-20 h-20 mb-3 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                            <Image
+                              src={shop.logo_url || "/placeholder.svg"}
+                              alt={shop.name}
+                              width={80}
+                              height={80}
+                              className="object-contain"
+                            />
+                          </div>
+                          <div className="font-bold text-lg text-gray-900 dark:text-white mb-1 text-center">
+                            {shop.name || "Unnamed Shop"}
+                          </div>
+                          {shop.address && (
+                            <div className="text-xs text-gray-500 dark:text-gray-400 mb-1 text-center">
+                              {shop.address}
+                            </div>
+                          )}
+                          <div className="text-xs text-gray-600 dark:text-gray-300 mb-2">
+                            {shopProductsCount} Products
+                          </div>
+                          <Link
+                            href={`/shops/${shop.id}`}
+                            className="mt-2 px-4 py-1 bg-blue-600 text-white rounded-full text-xs font-semibold hover:bg-blue-700 transition-colors"
+                          >
+                            View Shop
+                          </Link>
                         </Card>
                       );
                     })}

@@ -4,7 +4,7 @@ import type React from "react"
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { Facebook, Twitter, Instagram, Mail, MapPin, Phone, ArrowUp } from "lucide-react"
-import { VristoLogo } from "./vristo-logo"
+import Image from "next/image"
 
 const SiteFooter: React.FC = () => {
   const [showScrollTop, setShowScrollTop] = useState(false)
@@ -24,7 +24,7 @@ const SiteFooter: React.FC = () => {
           {/* First column: Logo and newsletter */}
           <div className="flex flex-col space-y-4 items-center sm:items-start text-center sm:text-left">
             <div className="w-full flex justify-center sm:justify-start">
-              <VristoLogo size={110} className="mx-auto sm:mx-0" />
+              <Image src="/LOGO%20KLIKMART.png" alt="KlikMart" width={420} height={140} className="mx-auto sm:mx-0 h-28 w-auto" />
             </div>
             <p className="text-sm w-full text-center sm:text-left">
               Subscribe to our newsletter to get latest updates
@@ -165,7 +165,7 @@ const SiteFooter: React.FC = () => {
 
       {/* Copyright */}
       <div className="bg-gray-800 dark:bg-gray-900 py-4 mt-10 text-center text-sm text-white">
-        © 2025 Vristo. All rights reserved.
+        © 2025 KlikMart. All rights reserved.
       </div>
 
       {/* Back to top button */}

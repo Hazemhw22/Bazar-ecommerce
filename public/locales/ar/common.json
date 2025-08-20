@@ -1,0 +1,19 @@
+{
+  "siteTitle": "بازار - متجر إلكتروني",
+  "welcome": "مرحبًا بك في بازار!",
+  "products": "المنتجات",
+  "shops": "المتاجر",
+  "categories": "التصنيفات",
+  "cart": "عربة التسوق",
+  "checkout": "الدفع",
+  "orders": "الطلبات",
+  "favourites": "المفضلة",
+  "account": "الحساب",
+  "search": "بحث...",
+  "addToCart": "أضف إلى السلة",
+  "viewShop": "عرض المتجر",
+  "viewDetails": "عرض التفاصيل",
+  "language": "اللغة",
+  "arabic": "العربية",
+  "english": "الإنجليزية"
+}

@@ -7,6 +7,9 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "../components/ui/dropdown-menu"
+import { useRouter } from 'next/navigation';
+import { useTranslation } from 'next-i18next';
+import { useEffect, useState } from 'react';
 
 const languages = [
   { code: "ar", label: "العربية", flag: "https://flagcdn.com/w40/ae.png" },
@@ -15,9 +18,36 @@ const languages = [
 ]
 
 export function LanguageSelector() {
-  // تخزين اللغة الحالية، ممكن تطويرها لتكون من السياق أو من localStorage
-  const currentLang = typeof window !== "undefined" ? localStorage.getItem("lang") || "en" : "en"
-  const currentLangData = languages.find((l) => l.code === currentLang) || languages[2]
+  const router = useRouter();
+  const { i18n, t } = useTranslation();
+
+  // استخدم useState/useEffect لجلب اللغة من localStorage فقط على العميل
+  const [currentLang, setCurrentLang] = useState(i18n.language || 'en');
+
+  useEffect(() => {
+    const lang = localStorage.getItem('lang');
+    if (lang && lang !== currentLang) {
+      setCurrentLang(lang);
+    }
+  }, []);
+
+  const currentLangData = languages.find((l) => l.code === currentLang) || languages[2];
+
+  const changeLanguage = (lng: string) => {
+    localStorage.setItem("lang", lng);
+    // استخراج المسار الحالي بدون البادئة
+    const path = window.location.pathname;
+    const segments = path.split('/');
+    // إذا كان أول جزء هو رمز لغة، أزله
+    const supportedLangs = ['ar', 'en', 'he'];
+    if (supportedLangs.includes(segments[1])) {
+      segments.splice(1, 1);
+    }
+    // إعادة بناء المسار مع اللغة الجديدة
+    const newPath = '/' + lng + segments.join('/') + window.location.search;
+    router.push(newPath);
+    setCurrentLang(lng);
+  };
 
   return (
     <DropdownMenu>
@@ -37,11 +67,7 @@ export function LanguageSelector() {
         {languages.map((lang) => (
           <DropdownMenuItem
             key={lang.code}
-            onClick={() => {
-              localStorage.setItem("lang", lang.code)
-              // إعادة تحميل الصفحة لتطبيق التغيير
-              window.location.reload()
-            }}
+            onClick={() => changeLanguage(lang.code)}
             className="flex items-center gap-2"
           >
             <Image

@@ -27,7 +27,7 @@ const BreadcrumbsNav = () => {
   );
 
   useEffect(() => {
-    const segments = pathname.split("/").filter(Boolean);
+    const segments = (pathname ?? "").split("/").filter(Boolean);
 
     // جلب اسم المنتج الحقيقي
     if (segments[0] === "products" && segments[1]) {
@@ -84,7 +84,7 @@ const BreadcrumbsNav = () => {
 
   if (pathname === "/") return null;
 
-  const segments = pathname.split("/").filter(Boolean);
+  const segments = (pathname ?? "").split("/").filter(Boolean);
 
   const breadcrumbs = segments.map((segment, i) => {
     const href = "/" + segments.slice(0, i + 1).join("/");

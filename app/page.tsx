@@ -96,10 +96,6 @@ export default function Home() {
       {/* القسم الرئيسي */}
       <section className="flex-1 flex flex-col gap-4">
         <HeroSection />
-        {/* قائمة التصنيفات في الموبايل - تحت الهيرو */}
-        <div className="block md:hidden mb-4">
-          <BrandList />
-        </div>
         {loading ? (
           <div className="text-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
