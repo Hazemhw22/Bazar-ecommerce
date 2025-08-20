@@ -3,9 +3,11 @@ import ProductDetail from "./product-page";
 import { notFound } from "next/navigation";
 import type { Product } from "../../../lib/type";
 
-
-export default async function Page({ params }: { params: { id: string } } | { params: Promise<{ id: string }> }) {
-  const resolvedParams = await (params as any);
+export default async function ProductPage({
+  params,
+}: {
+  params: { id: string };
+}) {
   const supabase = createServerSupabaseClient();
 
   // الاستعلام عن المنتج مع العلاقات الصحيحة حسب الأنواع
@@ -32,7 +34,7 @@ export default async function Page({ params }: { params: { id: string } } | { pa
       categories:category_id ( id, name, description, created_at, updated_at )
     `
     )
-    .eq("id", resolvedParams.id)
+    .eq("id", params.id)
     .single();
 
   if (error || !product) {
@@ -93,6 +95,6 @@ export default async function Page({ params }: { params: { id: string } } | { pa
   };
 
   return (
-    <ProductDetail params={{ id: resolvedParams.id }} product={normalizedProduct} />
+    <ProductDetail params={{ id: params.id }} product={normalizedProduct} />
   );
 }
